@@ -61,27 +61,35 @@ public class ClienteController {
         return ResponseEntity.ok(response);
     }
 
-    @PostMapping("/anadirReporte")
-    public ResponseEntity<Cliente>  anadirReporte(@RequestParam("id") Long id,
-                                 @RequestParam("reporte") MultipartFile archivo,
-                                 @RequestParam("auditado") boolean auditado) throws IOException {
+    @PostMapping("/clientes/{id}/anadirReporte")
+    public ResponseEntity<Cliente> anadirReporte(@RequestParam("id") Long id,
+                                                 @RequestParam("reporte") MultipartFile archivo,
+                                                 @RequestParam("auditado") boolean auditado) {
+
         Cliente cliente = clienteRepository.findById(id)
                 .orElseThrow(() -> new ResourceNotFoundException("El cliente con ese ID no existe : " + id));
+        try {
 
-        List<Reporte> reportes = new ArrayList<>();
-        byte[] contenido = archivo.getBytes();
+            List<Reporte> reportes = cliente.getReportes();
+            if (cliente.getReportes() == null) {
+                reportes = new ArrayList<>();
+            }
 
-        // Crea una nueva instancia de Reporte y establece sus atributos
-        Reporte nuevoReporte = new Reporte();
-        nuevoReporte.setReporte(contenido); // Guarda el contenido del archivo en el campo de tipo BLOB
-        nuevoReporte.setAuditado(auditado);
-        nuevoReporte.setCliente(cliente);
+            byte[] contenido = archivo.getBytes();
 
-        reportes.add(nuevoReporte);
-        cliente.setReportes(reportes); //Probar que siemrpe almacene nuevos reportes
+            // Crea una nueva instancia de Reporte y establece sus atributos
+            Reporte nuevoReporte = new Reporte();
+            nuevoReporte.setReporte(contenido); // Guarda el contenido del archivo en el campo de tipo BLOB
+            nuevoReporte.setAuditado(auditado);
+            reportes.add(nuevoReporte);
+            cliente.setReportes(reportes);
 
-        clienteRepository.save(cliente);
+            clienteRepository.save(cliente);
 
-        return ResponseEntity.ok(cliente);
+            return ResponseEntity.ok(cliente);
+        } catch (IOException e) {
+            System.err.println(e);
+            return ResponseEntity.of(Optional.empty());
+        }
     }
 }

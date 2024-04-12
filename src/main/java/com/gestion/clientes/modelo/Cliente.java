@@ -14,7 +14,6 @@ import java.util.List;
 @Table(name = "clientes")
 public class Cliente {
     @Id
-    //@GeneratedValue(strategy = GenerationType.IDENTITY)
     private long id;
 
     @Column(name = "nombre")
@@ -32,6 +31,6 @@ public class Cliente {
     @Column(name= "contrasena")
     private String contrasena;
 
-    @OneToMany(fetch = FetchType.LAZY, mappedBy = "cliente", cascade = CascadeType.ALL)
+    @OneToMany(fetch = FetchType.LAZY, cascade = CascadeType.ALL)
     private List<Reporte> reportes;
 }

@@ -5,6 +5,7 @@ import com.gestion.clientes.modelo.Cliente;
 import com.gestion.clientes.modelo.Reporte;
 import com.gestion.clientes.repository.ClienteRepository;
 import com.gestion.clientes.repository.ReporteRepository;
+import com.gestion.clientes.service.ReporteService;
 import jakarta.annotation.Resource;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.core.io.ByteArrayResource;
@@ -24,6 +25,12 @@ import java.util.Map;
 public class ReporteController {
     @Autowired
     private ReporteRepository reporteRepository;
+
+    @Autowired
+    private ClienteRepository clienteRepository;
+
+    @Autowired
+    private ReporteService reporteService;
 
 
     //Este pide el archivo pdf
@@ -47,7 +54,7 @@ public class ReporteController {
     @PostMapping("/reportes")
     public ResponseEntity<Reporte> cargarReporte(
             @RequestParam("reporte") MultipartFile archivo, // Recibe el archivo PDF
-            @ModelAttribute Cliente cliente,               // Recibe el objeto Cliente
+            @RequestParam("idCliente") Long id,           // Recibe el id del cliente
             @RequestParam("auditado") boolean auditado) throws IOException {   // Recibe el estado de auditoría del reporte
 
 //        try {
@@ -74,9 +81,10 @@ public class ReporteController {
 
         // Crea una nueva instancia de Reporte y establece sus atributos
         Reporte nuevoReporte = new Reporte();
-        nuevoReporte.setCliente(cliente); // Asigna el cliente al reporte
+        Cliente cliente = clienteRepository.findById(id).orElseThrow();
         nuevoReporte.setReporte(contenido); // Guarda el contenido del archivo en el campo de tipo BLOB
         nuevoReporte.setAuditado(auditado);
+        cliente.getReportes().add(nuevoReporte);
 
         // Guarda el reporte en la base de datos
         reporteRepository.save(nuevoReporte);

@@ -16,8 +16,8 @@ public class Reporte {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private long id;
 
-    @ManyToOne
-    @JoinColumn(name = "idUsuario") // Nombre de la columna de la llave foránea en la tabla Producto
+    @ManyToOne(cascade = CascadeType.ALL)
+    @JoinColumn(name = "cliente_id")
     private Cliente cliente;
 
     @Lob

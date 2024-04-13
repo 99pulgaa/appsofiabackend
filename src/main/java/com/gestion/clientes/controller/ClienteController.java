@@ -2,13 +2,17 @@ package com.gestion.clientes.controller;
 
 import com.gestion.clientes.exception.ResourceNotFoundException;
 import com.gestion.clientes.modelo.Cliente;
+import com.gestion.clientes.modelo.Reporte;
 import com.gestion.clientes.repository.ClienteRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.web.multipart.MultipartFile;
 
+import java.io.IOException;
 import java.util.*;
 
+@CrossOrigin(origins = "http://localhost:3000/")
 @RestController
 @RequestMapping("/api/v1")
 public class ClienteController {
@@ -55,5 +59,37 @@ public class ClienteController {
         Map<String, Boolean> response = new HashMap<>();
         response.put("Deleted", Boolean.TRUE);
         return ResponseEntity.ok(response);
+    }
+
+    @PostMapping("/clientes/{id}/anadirReporte")
+    public ResponseEntity<Cliente> anadirReporte(@RequestParam("id") Long id,
+                                                 @RequestParam("reporte") MultipartFile archivo,
+                                                 @RequestParam("auditado") boolean auditado) {
+
+        Cliente cliente = clienteRepository.findById(id)
+                .orElseThrow(() -> new ResourceNotFoundException("El cliente con ese ID no existe : " + id));
+        try {
+
+            List<Reporte> reportes = cliente.getReportes();
+            if (cliente.getReportes() == null) {
+                reportes = new ArrayList<>();
+            }
+
+            byte[] contenido = archivo.getBytes();
+
+            // Crea una nueva instancia de Reporte y establece sus atributos
+            Reporte nuevoReporte = new Reporte();
+            nuevoReporte.setReporte(contenido); // Guarda el contenido del archivo en el campo de tipo BLOB
+            nuevoReporte.setAuditado(auditado);
+            reportes.add(nuevoReporte);
+            cliente.setReportes(reportes);
+
+            clienteRepository.save(cliente);
+
+            return ResponseEntity.ok(cliente);
+        } catch (IOException e) {
+            System.err.println(e);
+            return ResponseEntity.of(Optional.empty());
+        }
     }
 }

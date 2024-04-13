@@ -16,12 +16,8 @@ public class Reporte {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private long id;
 
-    @ManyToOne
-    @JoinColumn(name = "idUsuario") // Nombre de la columna de la llave foránea en la tabla Producto
-    private Cliente cliente;
-
     @Lob
-    @Column(name = "reporte", length = 10485760) // Por ejemplo, para un tamaño máximo de 10 MB
+    @Column(name = "reporte", length = 10485760) // Tamaño máximo de 10 MB
     private byte[] reporte;
 
     @Column(name = "auditado")

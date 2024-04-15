@@ -62,9 +62,8 @@ public class ClienteController {
     }
 
     @PostMapping("/clientes/{id}/anadirReporte")
-    public ResponseEntity<Cliente> anadirReporte(@RequestParam("id") Long id,
-                                                 @RequestParam("reporte") MultipartFile archivo,
-                                                 @RequestParam("auditado") boolean auditado) {
+    public ResponseEntity<Cliente> anadirReporte(@PathVariable("id") Long id,
+                                                 @RequestParam("reporte") MultipartFile archivo) {
 
         Cliente cliente = clienteRepository.findById(id)
                 .orElseThrow(() -> new ResourceNotFoundException("El cliente con ese ID no existe : " + id));
@@ -80,7 +79,7 @@ public class ClienteController {
             // Crea una nueva instancia de Reporte y establece sus atributos
             Reporte nuevoReporte = new Reporte();
             nuevoReporte.setReporte(contenido); // Guarda el contenido del archivo en el campo de tipo BLOB
-            nuevoReporte.setAuditado(auditado);
+            nuevoReporte.setAuditado(false);
             reportes.add(nuevoReporte);
             cliente.setReportes(reportes);
 

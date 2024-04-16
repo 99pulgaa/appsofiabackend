@@ -4,6 +4,7 @@ import com.gestion.clientes.exception.ResourceNotFoundException;
 import com.gestion.clientes.modelo.Cliente;
 import com.gestion.clientes.modelo.Reporte;
 import com.gestion.clientes.repository.ClienteRepository;
+import com.gestion.clientes.repository.ReporteRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
@@ -19,6 +20,9 @@ public class ClienteController {
 
     @Autowired
     private ClienteRepository clienteRepository;
+
+    @Autowired
+    private ReporteRepository reporteRepository;
 
     @GetMapping("/clientes")
     public List<Cliente> listarClientes() {
@@ -61,34 +65,5 @@ public class ClienteController {
         return ResponseEntity.ok(response);
     }
 
-    @PostMapping("/clientes/{id}/anadirReporte")
-    public ResponseEntity<Cliente> anadirReporte(@PathVariable("id") Long id,
-                                                 @RequestParam("reporte") MultipartFile archivo) {
 
-        Cliente cliente = clienteRepository.findById(id)
-                .orElseThrow(() -> new ResourceNotFoundException("El cliente con ese ID no existe : " + id));
-        try {
-
-            List<Reporte> reportes = cliente.getReportes();
-            if (cliente.getReportes() == null) {
-                reportes = new ArrayList<>();
-            }
-
-            byte[] contenido = archivo.getBytes();
-
-            // Crea una nueva instancia de Reporte y establece sus atributos
-            Reporte nuevoReporte = new Reporte();
-            nuevoReporte.setReporte(contenido); // Guarda el contenido del archivo en el campo de tipo BLOB
-            nuevoReporte.setAuditado(false);
-            reportes.add(nuevoReporte);
-            cliente.setReportes(reportes);
-
-            clienteRepository.save(cliente);
-
-            return ResponseEntity.ok(cliente);
-        } catch (IOException e) {
-            System.err.println(e);
-            return ResponseEntity.of(Optional.empty());
-        }
-    }
 }

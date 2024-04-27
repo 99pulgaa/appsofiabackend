@@ -5,6 +5,7 @@ import com.gestion.clientes.modelo.Cliente;
 import com.gestion.clientes.modelo.Reporte;
 import com.gestion.clientes.repository.ClienteRepository;
 import com.gestion.clientes.repository.ReporteRepository;
+import com.gestion.clientes.service.ClienteService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
@@ -17,53 +18,37 @@ import java.util.*;
 @RestController
 @RequestMapping("/api/v1")
 public class ClienteController {
-
     @Autowired
-    private ClienteRepository clienteRepository;
-
-    @Autowired
-    private ReporteRepository reporteRepository;
+    private ClienteService clienteService;
 
     @GetMapping("/clientes")
     public List<Cliente> listarClientes() {
-        return clienteRepository.findAll();
+        return clienteService.listarClientes();
 
     }
 
     @PostMapping("/clientes")
-    public Cliente guardarCliente(@RequestBody Cliente cliente) {
-        return clienteRepository.save(cliente);
+    public ResponseEntity<Cliente> guardarCliente(@RequestBody Cliente cliente) {
+        return clienteService.guardarCliente(cliente);
     }
 
     @GetMapping("/clientes/{id}")
     public ResponseEntity<Cliente> ListarClientePorId(@PathVariable Long id) {
-        Cliente cliente = clienteRepository.findById(id)
-                .orElseThrow(() -> new ResourceNotFoundException("El cliente con ese ID no existe : " + id));
-        return ResponseEntity.ok(cliente);
+        return clienteService.listarClientePorId(id);
     }
 
     @PutMapping("/clientes/{id}")
     public ResponseEntity<Cliente> actualizarCliente(@PathVariable Long id, @RequestBody Cliente clienteRequest) {
-        Cliente cliente = clienteRepository.findById(id)
-                .orElseThrow(() -> new ResourceNotFoundException("El cliente con ese ID no existe : " + id));
+        return clienteService.actualizarCliente(id,clienteRequest);
+    }
 
-        cliente.setNombre(clienteRequest.getNombre());
-        cliente.setFechaNacimiento(clienteRequest.getFechaNacimiento());
-        cliente.setEmail(clienteRequest.getEmail());
-
-        Cliente clienteActualizado = clienteRepository.save(cliente);
-        return ResponseEntity.ok(clienteActualizado);
+    @PutMapping("/clientes/{id}/resetPassword")
+    public ResponseEntity<Cliente> actualizarContrasena(@PathVariable Long id, @RequestBody Cliente cliente) {
+        return clienteService.actualizarContrasena(id,cliente);
     }
 
     @DeleteMapping("/clientes/{id}")
     public ResponseEntity<Map<String, Boolean>> eliminarCliente(@PathVariable Long id) {
-        Cliente cliente = clienteRepository.findById(id)
-                .orElseThrow(() -> new ResourceNotFoundException("El cliente con ese ID no existe : " + id));
-        clienteRepository.delete(cliente);
-        Map<String, Boolean> response = new HashMap<>();
-        response.put("Deleted", Boolean.TRUE);
-        return ResponseEntity.ok(response);
+        return clienteService.eliminarCliente(id);
     }
-
-
 }
